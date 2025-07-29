@@ -20,47 +20,41 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
-      - name: Create back-dns .env
-        run: |
-          cat <<EOF > back.env
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
-          DB_HOST=${{ secrets.DB_HOST }}
-          DB_PORT=${{ secrets.DB_PORT }}
-          DB_USER=${{ secrets.DB_USER }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_NAME=${{ secrets.DB_NAME }}
-          ABSTRACT_API_KEY=${{ secrets.ABSTRACT_API_KEY }}
-          SMTP_USER=${{ secrets.SMTP_USER }}
-          SMTP_PASS=${{ secrets.SMTP_PASS }}
-          RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
-          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
-          DATABASE_URL=${{ secrets.DATABASE_URL }}
-          EOF
-
-      - name: Create dns .env
-        run: |
-          cat <<EOF > front.env
-          VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
-          VITE_API_URL=${{ secrets.VITE_API_URL }}
-          EOF
-
-      - name: Copy .env files to VPS
-        run: |
-          scp -o StrictHostKeyChecking=no back.env root@${{ secrets.VPS_HOST }}:/root/deploy-stack/back-dns/.env
-          scp -o StrictHostKeyChecking=no front.env root@${{ secrets.VPS_HOST }}:/root/deploy-stack/dns/.env
-
       - name: SSH and deploy
-        run: |
-          ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_HOST }} << 'EOF'
-            mkdir -p /root/deploy-stack
-            cd /root/deploy-stack
+  run: |
+    ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_HOST }} << EOF
+      mkdir -p /root/deploy-stack
+      cd /root/deploy-stack
 
-            rm -rf back-dns dns
+      rm -rf back-dns dns
 
-            git clone https://github.com/guayabask/back-dns.git
-            git clone https://github.com/Tommoko3ds/dns.git
+      git clone https://github.com/guayabask/back-dns.git
+      git clone https://github.com/Tommoko3ds/dns.git
 
-            docker compose down
-            docker compose up -d --build
-          EOF
+      # Crear .env dentro de back-dns
+      cat > back-dns/.env << EOT
+      JWT_SECRET=${{ secrets.JWT_SECRET }}
+      JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
+      DB_HOST=${{ secrets.DB_HOST }}
+      DB_PORT=${{ secrets.DB_PORT }}
+      DB_USER=${{ secrets.DB_USER }}
+      DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+      DB_NAME=${{ secrets.DB_NAME }}
+      ABSTRACT_API_KEY=${{ secrets.ABSTRACT_API_KEY }}
+      SMTP_USER=${{ secrets.SMTP_USER }}
+      SMTP_PASS=${{ secrets.SMTP_PASS }}
+      RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
+      FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+      DATABASE_URL=${{ secrets.DATABASE_URL }}
+      EOT
+
+      # Crear .env dentro de dns
+      cat > dns/.env << EOT
+      VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+      VITE_API_URL=${{ secrets.VITE_API_URL }}
+      EOT
+
+      docker compose down
+      docker compose up -d --build
+    EOF
+
