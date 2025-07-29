@@ -32,7 +32,7 @@ jobs:
 
             # Clona los dos repos públicos
             git clone https://github.com/guayabask/back-dns.git
-            git clone https://github.com/guayabask/dns.git
+            git clone https://github.com/Tommoko3ds/dns.git
 
             # Crea archivo .env si no existe
             if [ ! -f .env ]; then
