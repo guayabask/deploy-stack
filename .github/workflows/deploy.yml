@@ -31,6 +31,13 @@ jobs:
             git clone https://github.com/guayabask/back-dns.git
             git clone https://github.com/Tommoko3ds/dns.git
 
+            cat > /root/deploy-stack/.env << EOT
+            MYSQL_ALLOW_EMPTY_PASSWORD=yes
+            MYSQL_DATABASE=nest_contacts
+            MYSQL_USER=root
+            MYSQL_PASSWORD=
+            EOT
+            
             # Crear .env dentro de back-dns
             cat > back-dns/.env << EOT
             JWT_SECRET=${{ secrets.JWT_SECRET }}
