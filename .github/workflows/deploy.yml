@@ -31,7 +31,7 @@ jobs:
       git clone https://github.com/guayabask/back-dns.git
       git clone https://github.com/Tommoko3ds/dns.git
 
-      # Crear .env dentro de back-dns
+      # Crear .env dentro de back-dns curioso
       cat > back-dns/.env << EOT
       JWT_SECRET=${{ secrets.JWT_SECRET }}
       JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
