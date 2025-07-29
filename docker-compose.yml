@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  api:
+    build: ./back-dns
+    container_name: api
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ""
+      DB_NAME: ${MYSQL_DATABASE}
+    env_file:
+      - ./back-dns/.env
+    ports:
+      - "4000:4000"
+    networks:
+      - app-network
+
+  landing:
+    build: ./dns
+    container_name: landing
+    ports:
+      - "80:80" # ← ⚠️ Lo ideal para VPS es usar el puerto 80 directamente
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge

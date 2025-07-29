@@ -1,0 +1,44 @@
+name: Deploy Full Stack
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout deploy repo
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Deploy on VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_HOST }} << 'EOF'
+            # Crear carpeta si no existe
+            mkdir -p /root/deploy-stack
+            cd /root/deploy-stack
+
+            # Elimina versiones anteriores si existen
+            rm -rf back-dns dns
+
+            # Clona los dos repos públicos
+            git clone https://github.com/guayabask/back-dns.git
+            git clone https://github.com/guayabask/dns.git
+
+            # Crea archivo .env si no existe
+            if [ ! -f .env ]; then
+              echo "MYSQL_DATABASE=mydb" > .env
+            fi
+
+            # Ejecuta docker compose
+            docker compose down
+            docker compose up -d --build
+          EOF
