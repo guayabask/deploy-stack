@@ -26,7 +26,7 @@ jobs:
             mkdir -p /root/deploy-stack
             cd /root/deploy-stack
 
-            # Elimina versiones anteriores si existen
+            # Elimina versiones anteriores si existen 1
             rm -rf back-dns dns
 
             # Clona los dos repos públicos
